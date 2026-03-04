@@ -5,6 +5,19 @@ export const createSwap = async (req, res) => {
   try {
     const { receiver, offeredSkill, requestedSkill } = req.body;
 
+    // Prevent duplicate pending swap
+    const existingSwap = await Swap.findOne({
+        sender: req.user.id,
+        receiver,
+        status: "pending",
+    });
+
+    if (existingSwap) {
+      return res.status(400).json({
+        message: "Swap request already sent",
+    });
+    }
+
     const newSwap = new Swap({
       sender: req.user.id,
       receiver,
