@@ -158,7 +158,7 @@ function App() {
 
       <hr />
 
-      <h2>My Swaps</h2>
+      <h2>My Swaps ({swaps.length})</h2>
       <button onClick={fetchSwaps}>Load Swaps</button>
 
       <ul>
