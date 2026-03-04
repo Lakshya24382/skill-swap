@@ -7,29 +7,31 @@ function App() {
   const [users, setUsers] = useState([]);
   const [swaps, setSwaps] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showSwaps, setShowSwaps] = useState(false); // 👈 ADD HERE
 
   const login = async () => {
   try {
     const res = await axios.post(
       "http://localhost:8000/api/auth/login",
       { email, password }
-    );
+      );
 
-    localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", res.data.token);
 
-    // Decode JWT payload
-    const payload = JSON.parse(
+      // Decode JWT payload
+      const payload = JSON.parse(
       atob(res.data.token.split(".")[1])
     );
 
     localStorage.setItem("userId", payload.id);
 
     setIsLoggedIn(true);
+    fetchSwaps();   // only to get count
     alert("Login successful 🚀");
   } catch (err) {
     alert("Invalid credentials");
   }
-};
+  };
 
   const fetchUsers = async () => {
     const token = localStorage.getItem("token");
@@ -159,39 +161,45 @@ function App() {
       <hr />
 
       <h2>My Swaps ({swaps.length})</h2>
-      <button onClick={fetchSwaps}>Load Swaps</button>
+      <button onClick={() => setShowSwaps(true)}>
+        Load Swaps
+      </button>
 
-      <ul>
-        {swaps.map((swap) => (
-          <li key={swap._id} style={{ marginBottom: "20px" }}>
-            From: {swap.sender.name} <br />
-            To: {swap.receiver.name} <br />
-            Offered: {swap.offeredSkill} <br />
-            Requested: {swap.requestedSkill} <br />
-            Status: {swap.status}
-            <br /><br />
+      {showSwaps && (
+        <ul>
+          {swaps.map((swap) => (
+            <li key={swap._id} style={{ marginBottom: "20px" }}>
+              From: {swap.sender.name} <br />
+              To: {swap.receiver.name} <br />
+              Offered: {swap.offeredSkill} <br />
+              Requested: {swap.requestedSkill} <br />
+              Status: {swap.status}
+              <br /><br />
 
-            {swap.status === "pending" && (
-              <>
-                <button
-                  onClick={() =>
-                    updateSwapStatus(swap._id, "accepted")
-                  }
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() =>
-                    updateSwapStatus(swap._id, "rejected")
-                  }
-                >
-                  Reject
-                </button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+              {swap.status === "pending" &&
+                swap.receiver._id === localStorage.getItem("userId") && (
+                  <>
+                    <button
+                      onClick={() =>
+                        updateSwapStatus(swap._id, "accepted")
+                      }
+                    >
+                      Accept
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        updateSwapStatus(swap._id, "rejected")
+                      }
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
