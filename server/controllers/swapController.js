@@ -16,8 +16,9 @@ export const createSwap = async (req, res) => {
 
     res.status(201).json({ message: "Swap request sent" });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
+  console.log("SWAP ERROR:", error);
+  res.status(500).json({ message: error.message });
+}
 };
 
 // GET MY SWAPS
